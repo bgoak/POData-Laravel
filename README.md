@@ -8,7 +8,8 @@
 [![Daily Downloads](https://poser.pugx.org/algo-web/podata-laravel/d/daily)](https://packagist.org/packages/algo-web/podata-laravel)
 
 # POData-Laravel
-Composer Package to provide Odata functionality to Laravel
+Composer Package to provide Odata functionality to Laravel.
+
 With support for Laravel 5.7 since PostgreSQL support in Laravel 5.1 is broken.
 
 To install, run
