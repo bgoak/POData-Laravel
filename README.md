@@ -9,6 +9,7 @@
 
 # POData-Laravel
 Composer Package to provide Odata functionality to Laravel
+With support for Laravel 5.7 since PostgreSQL support in Laravel 5.1 is broken.
 
 To install, run
 ```
@@ -22,6 +23,7 @@ AlgoWeb\PODataLaravel\Providers\MetadataProvider::class,
 AlgoWeb\PODataLaravel\Providers\MetadataRouteProvider::class,
 AlgoWeb\PODataLaravel\Providers\QueryProvider::class,
 AlgoWeb\PODataLaravel\Providers\MetadataControllerProvider::class,
+Illuminate\Notifications\NotificationServiceProvider::class,
 ```
 
 You then add the trait to the models you want to expose.
