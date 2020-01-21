@@ -263,6 +263,26 @@ class MetadataProvider extends MetadataBaseProvider
             $isFieldBool = TypeCode::BOOLEAN == $field->getEdmFieldType();
             $default = $isFieldBool ? ($default ? 'true' : 'false') : strval($default);
 
+            $typechange = $field->getEdmFieldType();
+            if($field->getEdmFieldType() == 11) {
+                $typechange = EdmPrimitiveType::INT32();
+            }
+            if($field->getEdmFieldType() == 16) {
+                $typechange = EdmPrimitiveType::STRING();
+            }
+            if($field->getEdmFieldType() == 6) {
+                $typechange = EdmPrimitiveType::DATETIME();
+            }
+            if($field->getEdmFieldType() == 7) {
+                $typechange = EdmPrimitiveType::DECIMAL();
+            }
+            if($field->getEdmFieldType() == 15) {
+                $typechange = EdmPrimitiveType::SINGLE();
+            }
+            if($field->getEdmFieldType() == 2) {
+                $typechange = EdmPrimitiveType::BOOLEAN();
+            }
+
             $meta->addPrimitiveProperty(
                 $odataEntity,
                 $field->getName(),
