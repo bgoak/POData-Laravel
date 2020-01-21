@@ -286,7 +286,7 @@ class MetadataProvider extends MetadataBaseProvider
             $meta->addPrimitiveProperty(
                 $odataEntity,
                 $field->getName(),
-                $field->getEdmFieldType(),
+                $typechange,
                 $field->getFieldType()->getValue() == EntityFieldType::PRIMITIVE_BAG()->getValue(),
                 $default,
                 $field->getIsNullable()
