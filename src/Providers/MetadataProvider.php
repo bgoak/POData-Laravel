@@ -20,6 +20,7 @@ use Illuminate\Support\Str;
 use POData\Common\InvalidOperationException;
 use POData\Providers\Metadata\ResourceStreamInfo;
 use POData\Providers\Metadata\SimpleMetadataProvider;
+use POData\Providers\Metadata\Type\EdmPrimitiveType;
 use POData\Providers\Metadata\Type\TypeCode;
 
 class MetadataProvider extends MetadataBaseProvider
@@ -240,7 +241,14 @@ class MetadataProvider extends MetadataBaseProvider
         /** @var EntityField[] $fields */
         $fields = array_diff_key($unifiedEntity->getFields(), $keyFields);
         foreach ($keyFields as $keyField) {
-            $meta->addKeyProperty($odataEntity, $keyField->getName(), $keyField->getEdmFieldType());
+            $typechange = $keyField->getEdmFieldType();
+            if($keyField->getEdmFieldType() == 11) {
+                $typechange = EdmPrimitiveType::INT32();
+            }
+            if($keyField->getEdmFieldType() == 16) {
+                $typechange = EdmPrimitiveType::STRING();
+            }
+            $meta->addKeyProperty($odataEntity, $keyField->getName(),$typechange );
         }
 
         foreach ($fields as $field) {
