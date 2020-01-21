@@ -50,6 +50,6 @@ class EntityFieldPrimitiveType extends Enum
     const BINARY = 'binary';
     const BLOB = 'blob';
     const FLOAT = 'float';
-    const GUID = 'guid';
+    const GUID = 'uuid';
     const DATEINTERVAL = 'dateinterval';
 }
