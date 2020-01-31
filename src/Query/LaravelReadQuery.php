@@ -519,8 +519,6 @@ class LaravelReadQuery extends LaravelBaseQuery
                 // ćonvert filterInfo into an array, remove all empty keys and reindex the array
                 $filter = array_values(array_filter(preg_split("/[(,)]/", $filterInfo->getExpressionAsString()), 'strlen'));
                 // when the 4th key exists multiple filters are set, if not skip the loop
-                #var_dump($filter);
-                #exit();
                 if(isset($filter[4])) {
                     $k = 0;
                     $key[$k] = preg_split("/[>]/", $filter[1]);
@@ -601,8 +599,6 @@ class LaravelReadQuery extends LaravelBaseQuery
                     }
                 }
 
-                #var_dump($value);
-                #exit();
                 if(is_array($value)) {
                     $baseurl = $sourceEntityInstance;
                     $baseurl->skip($skip);
@@ -623,10 +619,6 @@ class LaravelReadQuery extends LaravelBaseQuery
                     $bulkSetCount = $baseurl->count();
                     $resultSet = $baseurl->get();
 
-                    #$resultSet = $sourceEntityInstance->skip($skip)->take($top)->where('vertical', 'like', 'IND')->where('mlfbroot', 'like', '7KG7')->get();
-
-                    #var_dump($filter);
-                    #exit();
                 } else {
                     $resultSet = $sourceEntityInstance->skip($skip)->take($top)->where($key[1], $filteroperator, $value)->get();
                     $bulkSetCount = $sourceEntityInstance->skip($skip)->take($top)->where($key[1], $filteroperator, $value)->count();
@@ -638,7 +630,6 @@ class LaravelReadQuery extends LaravelBaseQuery
             }
 
             $bigSet = 20000 < $bulkSetCount;
-
             $resultCount = $bulkSetCount;
         } elseif ($bigSet) {
             if (!(isset($isvalid))) {
