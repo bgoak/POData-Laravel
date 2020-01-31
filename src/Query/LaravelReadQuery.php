@@ -121,7 +121,8 @@ class LaravelReadQuery extends LaravelBaseQuery
             $sourceEntityInstance,
             $nullFilter,
             $rawLoad,
-            $isvalid
+            $isvalid,
+            $filterInfo
         );
 
         if (isset($top)) {
@@ -507,14 +508,137 @@ class LaravelReadQuery extends LaravelBaseQuery
         $sourceEntityInstance,
         $nullFilter,
         $rawLoad,
-        callable $isvalid = null
-    ) {
-        $bulkSetCount = $sourceEntityInstance->count();
-        $bigSet = 20000 < $bulkSetCount;
-
+        callable $isvalid = null,
+        $filterInfo
+    )
+    {
         if ($nullFilter) {
             // default no-filter case, palm processing off to database engine - is a lot faster
-            $resultSet = $sourceEntityInstance->skip($skip)->take($top)->with($rawLoad)->get();
+            #$resultSet = $sourceEntityInstance->skip($skip)->take($top)->with($rawLoad)->get();
+            if (isset($filterInfo)) {
+                // ćonvert filterInfo into an array, remove all empty keys and reindex the array
+                $filter = array_values(array_filter(preg_split("/[(,)]/", $filterInfo->getExpressionAsString()), 'strlen'));
+                // when the 4th key exists multiple filters are set, if not skip the loop
+                #var_dump($filter);
+                #exit();
+                if(isset($filter[4])) {
+                    $k = 0;
+                    $key[$k] = preg_split("/[>]/", $filter[1]);
+                    $value[$k] = str_replace(array("'", " "), "", $filter[2]);
+                    $operator = $filter[3];
+                    if($filter[0] == 'strpos') {
+                        $filteroperator[$k] = 'like';
+                        $value[$k] = "%".$value[$k]."%";
+                    } else {
+                        if (str_replace(" ", "", $operator) == '==0') {
+                            $filteroperator = 'like';
+                        } elseif (str_replace(" ", "", $operator) == '!=0') {
+                            $filteroperator = 'not like';
+                        } elseif (str_replace(" ", "", $operator) == '>0') {
+                            $filteroperator = '>';
+                        } elseif (str_replace(" ", "", $operator) == '<0') {
+                            $filteroperator = '<';
+                        } elseif (str_replace(" ", "", $operator) == '>=0') {
+                            $filteroperator = '>=';
+                        } elseif (str_replace(" ", "", $operator) == '<=0') {
+                            $filteroperator = '<=';
+                        } else {
+                            $filteroperator = 'like';
+                        }
+                    }
+                    $k++;
+                    for ($i=4; isset($filter[$i]); $i++) {
+                        $key[$k] = preg_split("/[>]/", $filter[$i+2]);
+                        $value[$k] = str_replace(array("'", " "), "", $filter[$i+3]);
+                        $operator = $filter[$i+4];
+                        $multioperator[$k] = $filter[$i];
+                        if($filter[$i+1] == 'strpos') {
+                            $filteroperator[$k] = 'like';
+                            $value[$k] = "%".$value[$k]."%";
+                        } else {
+                            if (str_replace(" ", "", $operator) == '==0') {
+                                $filteroperator = 'like';
+                            } elseif (str_replace(" ", "", $operator) == '!=0') {
+                                $filteroperator = 'not like';
+                            } elseif (str_replace(" ", "", $operator) == '>0') {
+                                $filteroperator = '>';
+                            } elseif (str_replace(" ", "", $operator) == '<0') {
+                                $filteroperator = '<';
+                            } elseif (str_replace(" ", "", $operator) == '>=0') {
+                                $filteroperator = '>=';
+                            } elseif (str_replace(" ", "", $operator) == '<=0') {
+                                $filteroperator = '<=';
+                            } else {
+                                $filteroperator = 'like';
+                            }
+                        }
+                        $i = $i+4;
+                        $k++;
+                    }
+                } else {
+                    $key = preg_split("/[>]/", $filter[1]);
+                    $value = str_replace(array("'", " "), "", $filter[2]);
+                    $operator = $filter[3];
+                    if($filter[0] == 'strpos') {
+                        $filteroperator = 'like';
+                        $value = "%".$value."%";
+                    } else {
+                        if (str_replace(" ", "", $operator) == '==0') {
+                            $filteroperator = 'like';
+                        } elseif (str_replace(" ", "", $operator) == '!=0') {
+                            $filteroperator = 'not like';
+                        } elseif (str_replace(" ", "", $operator) == '>0') {
+                            $filteroperator = '>';
+                        } elseif (str_replace(" ", "", $operator) == '<0') {
+                            $filteroperator = '<';
+                        } elseif (str_replace(" ", "", $operator) == '>=0') {
+                            $filteroperator = '>=';
+                        } elseif (str_replace(" ", "", $operator) == '<=0') {
+                            $filteroperator = '<=';
+                        } else {
+                            $filteroperator = 'like';
+                        }
+                    }
+                }
+
+                #var_dump($value);
+                #exit();
+                if(is_array($value)) {
+                    $baseurl = $sourceEntityInstance;
+                    $baseurl->skip($skip);
+                    $baseurl->take($top);
+
+                    for ($i=0; $i < count($value); $i++) {
+                        if($i == 0) {
+                            $baseurl->where($key[$i][1], $filteroperator[$i], $value[$i]);
+                        } else {
+                            if($multioperator[$i] == ' || ') {
+                                $baseurl->orwhere($key[$i][1], $filteroperator[$i], $value[$i]);
+                            } elseif ($multioperator[$i] == ' && ') {
+                                $baseurl->where($key[$i][1], $filteroperator[$i], $value[$i]);
+                            }
+                        }
+                    }
+
+                    $bulkSetCount = $baseurl->count();
+                    $resultSet = $baseurl->get();
+
+                    #$resultSet = $sourceEntityInstance->skip($skip)->take($top)->where('vertical', 'like', 'IND')->where('mlfbroot', 'like', '7KG7')->get();
+
+                    #var_dump($filter);
+                    #exit();
+                } else {
+                    $resultSet = $sourceEntityInstance->skip($skip)->take($top)->where($key[1], $filteroperator, $value)->get();
+                    $bulkSetCount = $sourceEntityInstance->skip($skip)->take($top)->where($key[1], $filteroperator, $value)->count();
+                }
+
+            } else {
+                $resultSet = $sourceEntityInstance->skip($skip)->take($top)->get();
+                $bulkSetCount = $sourceEntityInstance->count();
+            }
+
+            $bigSet = 20000 < $bulkSetCount;
+
             $resultCount = $bulkSetCount;
         } elseif ($bigSet) {
             if (!(isset($isvalid))) {
