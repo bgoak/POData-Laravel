@@ -23,11 +23,11 @@ class MetadataRouteProvider extends ServiceProvider
         $authMiddleware = $this->getAuthMiddleware();
         $controllerMethod = 'AlgoWeb\PODataLaravel\Controllers\ODataController@index';
 
-        Route::get('odata.svc/$metadata', ['uses' => $controllerMethod, 'middleware' => null]);
+        Route::get('service-odata/odata.svc/$metadata', ['uses' => $controllerMethod, 'middleware' => null]);
 
-        Route::any('odata.svc/{section}', ['uses' => $controllerMethod, 'middleware' => $authMiddleware])
+        Route::any('service-odata/odata.svc/{section}', ['uses' => $controllerMethod, 'middleware' => $authMiddleware])
             ->where(['section' => '.*']);
-        Route::any('odata.svc', ['uses' => $controllerMethod, 'middleware' => null]);
+        Route::any('service-odata/odata.svc', ['uses' => $controllerMethod, 'middleware' => null]);
     }
 
     /**
