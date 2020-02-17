@@ -937,7 +937,8 @@ class IronicSerialiser implements IObjectSerialiser
         // switch (true) means we unconditionally enter, and then lean on case statements to match given block
         switch (true) {
             case $type instanceof StringType:
-                $stringValue = utf8_encode($primitiveValue);
+                #$stringValue = utf8_encode($primitiveValue);
+                $stringValue = $primitiveValue;
                 break;
             case $type instanceof Boolean:
                 $stringValue = (true === $primitiveValue) ? 'true' : 'false';
